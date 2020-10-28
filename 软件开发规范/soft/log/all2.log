@@ -1,0 +1,6 @@
+[2020-10-24 18:46:42,315][MainThread:11928][task_id:__main__][my_log_settings.py:74][INFO][It works!]
+[2020-10-24 18:52:02,300][MainThread:3472][task_id:conf.my_log_settings][my_log_settings.py:74][INFO][It works!]
+[2020-10-24 18:52:10,909][MainThread:11876][task_id:conf.my_log_settings][my_log_settings.py:74][INFO][It works!]
+[2020-10-24 18:52:22,933][MainThread:6156][task_id:conf.my_log_settings][my_log_settings.py:74][INFO][It works!]
+[2020-10-24 18:53:15,891][MainThread:3612][task_id:conf.my_log_settings][my_log_settings.py:74][INFO][It works!]
+[2020-10-24 18:53:22,024][MainThread:3612][task_id:core.main][main.py:23][INFO][登录成功]

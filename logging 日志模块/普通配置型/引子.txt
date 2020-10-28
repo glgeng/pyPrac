@@ -1,0 +1,34 @@
+功能：
+    1.日志格式的规范
+    2.操作的简化，不需要每次打开文件、关闭文件
+    3.日志的分级管理
+
+logging 不能帮你做的事情：
+    自动生成你要打印的内容
+    这些东西需要程序员自己在开发的时候定义好：
+        在哪些地方需要打印
+        要打印的内容是什么
+        内容的级别
+
+logging模块的使用：
+    普通配置型 ==> 简单、可定制化差
+    对象配置型 ==> 复杂、可定制化强
+
+认识日志的分级
+    #默认级别为warning，默认打印到终端
+
+    # logging.basicConfig(level = logging.DEBUG)
+    # logging.debug('调试debug')          调试模式
+    # logging.info('消息info')            基础信息
+    # logging.warning('警告warn')         警告
+    # logging.error('错误error')          错误
+    # logging.critical('严重critical')    严重错误
+
+一个模板
+logging.basicConfig(
+    level=logging.ERROR
+    format='%(asctime)s - %(name)s - %(levelname)s -%(module)s:  %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S %p',
+    handlers=[file_handler,],
+
+)

@@ -1,0 +1,358 @@
+字符：
+
+　　. 匹配除换行符以外的任意字符
+　　\w 匹配字母或数字或下划线或汉字
+　　\s 匹配任意的空白符
+　　\d 匹配数字
+　　\b 匹配单词的开始或结束
+　　^ 匹配字符串的开始
+　　$ 匹配字符串的结束
+
+次数：
+
+　　* 重复零次或更多次
+　　+ 重复一次或更多次
+　　? 重复零次或一次
+　　{n} 重复n次
+　　{n,} 重复n次或更多次
+　　{n,m} 重复n到m次
+
+# =================================匹配模式=================================
+#一对一的匹配
+# 'hello'.replace(old,new)
+# 'hello'.find('pattern')
+
+#正则匹配
+import re
+#\w与\W
+print(re.findall('\w','hello egon 123')) #['h', 'e', 'l', 'l', 'o', 'e', 'g', 'o', 'n', '1', '2', '3']
+print(re.findall('\W','hello egon 123')) #[' ', ' ']
+
+#\s与\S
+print(re.findall('\s','hello  egon  123')) #[' ', ' ', ' ', ' ']
+print(re.findall('\S','hello  egon  123')) #['h', 'e', 'l', 'l', 'o', 'e', 'g', 'o', 'n', '1', '2', '3']
+
+#\n \t都是空,都可以被\s匹配
+print(re.findall('\s','hello \n egon \t 123')) #[' ', '\n', ' ', ' ', '\t', ' ']
+
+#\n与\t
+print(re.findall(r'\n','hello egon \n123')) #['\n']
+print(re.findall(r'\t','hello egon\t123')) #['\n']
+
+#\d与\D
+print(re.findall('\d','hello egon 123')) #['1', '2', '3']
+print(re.findall('\D','hello egon 123')) #['h', 'e', 'l', 'l', 'o', ' ', 'e', 'g', 'o', 'n', ' ']
+
+#\A与\Z
+print(re.findall('\Ahe','hello egon 123')) #['he'],\A==>^
+print(re.findall('123\Z','hello egon 123')) #['123'],\Z==>$
+
+#^与$ 匹配字符串的开头和结尾
+print(re.findall('^h','hello egon 123')) #['h']
+print(re.findall('3$','hello egon 123')) #['3']
+
+=============================  # 重复匹配：| . | * | ? | .* | .*? | + | {n,m} |  ======================================
+
+#. 匹配任意字符，除了换行符
+print(re.findall('a.b','a1b')) #['a1b']
+print(re.findall('a.b','a1b a*b a b aaab')) #['a1b', 'a*b', 'a b', 'aab']
+print(re.findall('a.b','a\nb')) #[]
+print(re.findall('a.b','a\nb',re.S)) #['a\nb']
+print(re.findall('a.b','a\nb',re.DOTALL)) #['a\nb']同上一条意思一样
+
+#* 匹配0个或多个表达式
+print(re.findall('ab*','bbbbbbb')) #[]
+print(re.findall('ab*','a')) #['a']
+print(re.findall('ab*','abbbb')) #['abbbb']
+
+#? 匹配0个或1个由前面的正则表达式定义的片断  非贪婪方式
+print(re.findall('ab?','a')) #['a']
+print(re.findall('ab?','abbb')) #['ab']
+#匹配所有包含小数在内的数字
+print(re.findall('\d+\.?\d*',"asdfasdf123as1.13dfa12adsf1asdf3")) #['123', '1.13', '12', '1', '3']
+
+#.*默认为贪婪匹配
+print(re.findall('a.*b','a1b22222222b')) #['a1b22222222b']
+
+#.*?为非贪婪匹配：推荐使用
+print(re.findall('a.*?b','a1b22222222b')) #['a1b']  匹配直到遇见第一个b停止
+
+#+ 匹配一个或多个表达式
+print(re.findall('ab+','a')) #[]
+print(re.findall('ab+','abbb')) #['abbb']
+
+#{n,m}  匹配n到m次由前面的正则表达式定义的片断，贪婪方式
+print(re.findall('ab{2}','ab')) #[]
+print(re.findall('ab{2}','abbb')) #['abb']
+print(re.findall('ab{2,4}','abbb')) #['abb']
+print(re.findall('ab{1,}','abbb')) #'ab{1,}' ===> 'ab+'
+print(re.findall('ab{0,}','abbb')) #'ab{0,}' ===> 'ab*'
+
+#[] 用来表示一组字符，单独列出：[amk]匹配'a','m'或'k'
+print(re.findall('a[1*-]b','a1b a*b a-b')) # ['a1b', 'a*b', 'a-b']  []内的都为普通字符了，且如果-没有被转意的话，应该放到[]的开头或结尾
+print(re.findall('a[^1*-]b','a1b a*b a-b a=b')) #['a=b']  []内的^代表的意思是取反，所以结果为['a=b']
+print(re.findall('a[0-9]b','a1b a*b a-b a=b')) #['a1b']
+print(re.findall('a[a-z]b','a1b a*b a-b a=b aeb')) #['aeb']
+print(re.findall('a[a-zA-Z]b','a1b a*b a-b a=b aeb aEb')) #['aeb', 'aEb']
+
+#\  理解有困难
+# print(re.findall('a\\c','a\c')) #对于正则来说a\\c确实可以匹配到a\c,但是在python解释器读取a\\c时，会发生转义，然后交给re去执行，所以抛出异常
+print(re.findall(r'a\\c','a\c')) #['a\\c']  r代表告诉python解释器使用rawstring，即原生字符串，把我们正则内的所有符号都当普通字符处理，不要转义
+print(re.findall('a\\\\c','a\c')) #['a\\c']  同上面的意思一样，和上面的结果一样都是['a\\c']
+
+#():分组 匹配括号内的表达式，也表示一个组
+print(re.findall('ab+','ababab123')) #['ab', 'ab', 'ab']
+print(re.findall('(ab)+123','ababab123')) #['ab']，匹配到末尾的ab123中的ab
+print(re.findall('(?:ab)+123','ababab123')) #findall的结果不是匹配的全部内容，而是组内的内容,?:可以让结果为匹配的全部内容
+print(re.findall('href="(.*?)"','<a href="http://www.baidu.com">点击</a>'))#['http://www.baidu.com']
+print(re.findall('href="(?:.*?)"','<a href="http://www.baidu.com">点击</a>'))#['href="http://www.baidu.com"'] #findall的结果不是匹配的全部内容，而是组内的内容,?:可以让结果为匹配的全部内容
+
+#|  或者
+print(re.findall('compan(?:y|ies)','Too many companies have gone bankrupt, and the next one is my company'))
+#['companies', 'company']
+
+print(re.findall('compan(y|ies)','Too many companies have gone bankrupt, and the next one is my company'))
+#['ies', 'y']
+
+
+
+# ===========================re模块提供的方法介绍===========================
+import re
+#1
+print(re.findall('e','alex make love') )   #['e', 'e', 'e'],返回所有满足匹配条件的结果,放在列表里
+
+#2
+print(re.search('e','alex make love').group()) #e,只到找到第一个匹配然后返回一个包含匹配信息的对象,该对象可以通过调用group()方法得到匹配的字符串,如果字符串没有匹配，则返回None。
+
+#3
+print(re.match('e','alex make love'))  #None,同search,不过在字符串开始处进行匹配,完全可以用search+^代替match
+
+#4
+print(re.split('[ab]','abcd'))     #['', '', 'cd']，先按'a'分割得到''和'bcd',再对''和'bcd'分别按'b'分割
+
+#5
+print('===>',re.sub('a','A','alex make love')) #===> Alex mAke love，不指定n，默认替换所有
+print('===>',re.sub('a','A','alex make love',1)) #===> Alex make love
+print('===>',re.sub('a','A','alex make love',2)) #===> Alex mAke love
+print('===>',re.sub('^(\w+)(.*?\s)(\w+)(.*?\s)(\w+)(.*?)$',r'\5\2\3\4\1','alex make love')) #===> love make alex
+print('===>',re.subn('a','A','alex make love')) #===> ('Alex mAke love', 2),结果带有总共替换的个数
+'''
+re.sub(pattern, repl, string, count=0, flags=0)
+pattern : 正则中的模式字符串。
+repl : 替换的字符串，也可为一个函数。
+string : 要被查找替换的原始字符串。
+count : 模式匹配后替换的最大次数，默认 0 表示替换所有的匹配。
+'''
+
+#6
+obj=re.compile('\d{2}')
+
+print(obj.search('abc123eeee').group()) #12
+print(obj.findall('abc123eeee')) #['12'],重用了obj
+
+
+
+
+补充一
+import re
+print(re.findall("<(?P<tag_name>\w+)>\w+</(?P=tag_name)>","<h1>hello</h1>")) #['h1']
+print(re.search("<(?P<tag_name>\w+)>\w+</(?P=tag_name)>","<h1>hello</h1>").group()) #<h1>hello</h1>
+print(re.search("<(?P<tag_name>\w+)>\w+</(?P=tag_name)>","<h1>hello</h1>").groupdict()) #{'tag_name': 'h1'}
+print(re.search(r"<(\w+)>\w+</(\w+)>","<h1>hello</h1>").group()) #<h1>hello</h1>
+print(re.search(r"<(\w+)>\w+</\1>","<h1>hello</h1>").group()) #<h1>hello</h1>
+'''
+import re
+
+# 将匹配的数字乘以 2
+def double(matched):
+    value = int(matched.group('value'))
+    return str(value * 2)
+
+s = 'A23G4HFD567'
+print(re.findall('(?P<value>\d+)',s)) #['23', '4', '567']
+print(re.findall('(\d+)',s)) #['23', '4', '567']
+print(re.search("(?P<value>\d+)",s).group()) #23
+print(re.search("(?P<value>\d+)",s).groupdict()) #{'value': '23'}
+print(re.sub('(?P<value>\d+)', double, s)) #A46G8HFD1134
+
+ ?P<value>的意思就是命名一个名字为value的组，匹配规则符合后面的/d+
+'''
+
+
+
+#补充二
+import re#使用|，先匹配的先生效，|左边是匹配小数，而findall最终结果是查看分组，所有即使匹配成功小数也不会存入结果#而不是小数时，就去匹配(-?\d+)，匹配到的自然就是，非小数的数，在此处即整数#print(re.findall(r"-?\d+\.\d*|(-?\d+)","1-2*(60+(-40.35/5)-(-4*3))")) #找出所有整数['1', '-2', '60', '', '5', '-4', '3']#找到所有数字:print(re.findall('\D?(\-?\d+\.?\d*)',"1-2*(60+(-40.35/5)-(-4*3))")) # ['1','2','60','-40.35','5','-4','3']
+#计算器作业参考：http://www.cnblogs.com/wupeiqi/articles/4949995.html
+expression='1-2*((60+2*(-3-40.0/5)*(9-2*5/3+7/3*99/4*2998+10*568/14))-(-4*3)/(16-3*2))'
+
+content=re.search('\(([\-\+\*\/]*\d+\.?\d*)+\)',expression).group() #(-3-40.0/5)
+
+
+
+search与findall
+#为何同样的表达式search与findall却有不同结果:
+print(re.search('\(  ( [\+\-\*\/] *\d+ \. ?\d* ) +\)  ',"1-12*(60+(-40.35/5)-(-4*3))").group()) #(-40.35/5)
+print(re.findall('\(([\+\-\*\/]*\d+\.?\d*)+\)',"1-12*(60+(-40.35/5)-(-4*3))")) #['/5', '*3']
+
+#看这个例子:(\d)+相当于(\d)(\d)(\d)(\d)...,是一系列分组
+print(re.search('(\d)+','123').group()) #123  group的作用是将所有组拼接到一起显示出来
+print(re.findall('(\d)+','123')) #['3']  findall结果是组内的结果,且是最后一个组的结果
+
+
+
+#_*_coding:utf-8_*_
+__author__ = 'Linhaifeng'
+#在线调试工具:tool.oschina.net/regex/#
+import re
+
+s='''
+http://www.baidu.com
+egon@oldboyedu.com
+你好
+010-3141
+'''
+
+#最常规匹配
+#content='price is $5.00'
+#res=re.match('price is $5.00',content)
+#print(res) #None
+
+#res=re.match('price is \$5\.00',content)
+#print(res.group()) #price is $5.00
+#print(res) #<re.Match object; span=(0, 14), match='price is $5.00'>
+
+#泛匹配
+# content='Hello 123 456 World_This is a Regex Demo'
+# res=re.match('^Hello.*Demo',content)
+# print(res.group()) #Hello 123 456 World_This is a Regex Demo
+
+
+#匹配目标,获得指定数据
+content='Hello 123 456 World_This is a Regex Demo'
+res=re.match('^Hello \s (\d+) \s (\d+) \s .* Demo',content)
+print(res.group()) #Hello 123 456 World_This is a Regex Demo 取所有匹配的内容
+print(res.group(1)) #123 取匹配的第一个括号内的内容
+print(res.group(2)) #456 取匹配的第二个括号内的内容
+
+
+
+#贪婪匹配:.*代表匹配尽可能多的字符
+# import re
+# content='Hello 123 456 World_This is a Regex Demo'
+#
+# res=re.match('^He.*(\d+).*Demo$',content)
+# print(res.group(1)) #只打印6,因为.*会尽可能多的匹配,然后后面跟至少一个数字
+
+
+#非贪婪匹配:?匹配尽可能少的字符
+# import re
+# content='Hello 123 456 World_This is a Regex Demo'
+#
+# res=re.match('^He.*?(\d+).*Demo$',content)
+# print(res.group(1)) #只打印6,因为.*会尽可能多的匹配,然后后面跟至少一个数字
+
+
+#匹配模式:.不能匹配换行符
+content='''Hello 123456 World_This
+is a Regex Demo
+'''
+# res=re.match('He.*?(\d+).*?Demo$',content)
+# print(res) #输出None
+
+# res=re.match('He.*?(\d+).*?Demo$',content,re.S) #re.S让.可以匹配换行符
+# print(res)
+# print(res.group(1))
+
+
+#转义:\
+
+# content='price is $5.00'
+# res=re.match('price is $5.00',content)
+# print(res)
+#
+# res=re.match('price is \$5\.00',content)
+# print(res)
+
+
+#总结:尽量精简,详细的如下
+    # 尽量使用泛匹配模式.*
+    # 尽量使用非贪婪模式:.*?
+    # 使用括号得到匹配目标:用group(n)去取得结果
+    # 有换行符就用re.S:修改模式
+
+
+
+
+#re.search:会扫描整个字符串,不会从头开始,找到第一个匹配的结果就会返回
+
+# import re
+# content='Extra strings Hello 123 456 World_This is a Regex Demo Extra strings'
+#
+# res=re.match('Hello.*?(\d+).*?Demo',content)
+# print(res) #输出结果为None
+
+#
+# import re
+# content='Extra strings Hello 123 456 World_This is a Regex Demo Extra strings'
+#
+# res=re.search('Hello.*?(\d+).*?Demo',content) #
+# print(res.group(1)) #输出结果为
+
+
+
+#re.search:只要一个结果,匹配演练,
+import re
+content='''
+<tbody>
+<tr id="4766303201494371851675" class="even "><td><div class="hd"><span class="num">1</span><div class="rk "><span class="u-icn u-icn-75"></span></div></div></td><td class="rank"><div class="f-cb"><div class="tt"><a href="/song?id=476630320"><img class="rpic" src="http://p1.music.126.net/Wl7T1LBRhZFg0O26nnR2iQ==/19217264230385030.jpg?param=50y50&quality=100"></a><span data-res-id="476630320" "
+# res=re.search('<a\shref=.*?<b\stitle="(.*?)".*?b>',content)
+# print(res.group(1))
+
+
+#re.findall:找到符合条件的所有结果
+# res=re.findall('<a\shref=.*?<b\stitle="(.*?)".*?b>',content)
+# for i in res:
+#     print(i)
+
+
+
+#re.sub:字符串替换
+import re
+content='Extra strings Hello 123 456 World_This is a Regex Demo Extra strings'
+
+# content=re.sub('\d+','',content)
+# print(content)
+
+
+#用\1取得第一个括号的内容
+#用法:将123与456换位置
+# import re
+# content='Extra strings Hello 123 456 World_This is a Regex Demo Extra strings'
+#
+# # content=re.sub('(Extra.*?)(\d+)(\s)(\d+)(.*?strings)',r'\1\4\3\2\5',content)
+# content=re.sub('(\d+)(\s)(\d+)',r'\3\2\1',content)
+# print(content)
+
+
+
+# import re
+# content='Extra strings Hello 123 456 World_This is a Regex Demo Extra strings'
+#
+# res=re.search('Extra.*?(\d+).*strings',content)
+# print(res.group(1))
+
+
+# import requests,re
+# respone=requests.get('https://book.douban.com/').text
+
+# print(respone)
+# print('======'*1000)
+# print('======'*1000)
+# print('======'*1000)
+# print('======'*1000)
+# res=re.findall('<li.*?cover.*?href="(.*?)".*?title="(.*?)">.*?more-meta.*?author">(.*?)</span.*?year">(.*?)</span.*?publisher">(.*?)</span.*?</li>',respone,re.S)
+# # res=re.findall('<li.*?cover.*?href="(.*?)".*?more-meta.*?author">(.*?)</span.*?year">(.*?)</span.*?publisher">(.*?)</span>.*?</li>',respone,re.S)
+#
+#
+# for i in res:
+#     print('%s    %s    %s   %s' %(i[0].strip(),i[1].strip(),i[2].strip(),i[3].strip()))
